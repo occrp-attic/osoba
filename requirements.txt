@@ -1,4 +1,5 @@
 flask
 flask_restful
 flask_sqlalchemy
-
+sqlalchemy_utils
+psycopg2
