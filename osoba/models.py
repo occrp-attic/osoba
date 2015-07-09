@@ -13,6 +13,24 @@ OSOBA_RELATIONSHIP_TYPES = (
     "works_for",
 )
 
+def create_entity(_type, properties={}, commit=True):
+    e = Entity()
+    e.type = _type
+    db.session.add(e)
+    if commit:
+        db.session.commit()
+    return e
+
+def create_relationship(_type, _from, to, properties={}, commit=True):
+    e = Relationship()
+    e.type = _type
+    e._from = _from
+    e.to = to
+    db.session.add(e)
+    if commit:
+        db.session.commit()
+    return e
+
 ####################################################
 #
 # Core definitions

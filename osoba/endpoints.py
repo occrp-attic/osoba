@@ -1,4 +1,5 @@
 from osoba.models import *
+from osoba.bulkloaders import *
 from osoba.core import db
 from osoba import settings
 from flask import request
@@ -56,10 +57,7 @@ class EntityCollection(ValidatedResource):
         res, out = self.validate(request.get_json(), template)
         if not res: return {"error": out}, 400
 
-        e = Entity()
-        e.type = out.get("type")
-        db.session.add(e)
-        db.session.commit()
+        e = create_entity(out.get("type"))
         return e.to_json()
 
 class EntityMember(ValidatedResource):
@@ -109,13 +107,8 @@ class RelationshipCollection(ValidatedResource):
         res, out = self.validate(request.get_json(), template)
         if not res: return {"error": out}, 400
 
-        e = Relationship()
-        e.type = out.get("type")
-        e._from = out.get("from")
-        e.to = out.get("to")
-        db.session.add(e)
-        db.session.commit()
-        return e.to_json()
+        r = create_relationship(out.get("type"), out.get("from"), out.get("to"))
+        return r.to_json()
 
 class RelationshipMember(ValidatedResource):
     def get(self, rid):
@@ -155,14 +148,17 @@ class RelationshipMember(ValidatedResource):
 
 
 class BulkLoader(Resource):
-    from osoba.bulkloaders import *
     LOADERS = {
-        "application/json": JSONLoader,
-        "text/csv": CSVLoader,
-        "application/osoba": OsobaGraphLoader,
+        "json": JSONLoader,
+        "csvpair": CSVLoader,
+        "osoba": OsobaGraphLoader,
     }
 
     def post(self):
-        loader = self.LOADERS.get(request.mimetype)
-        results = loader().consume_request(request)
-        return results
+        print request.form
+        print request.files
+        loader = self.LOADERS.get(request.form.get("type"))
+        if not loader:
+            return {"error": "Unknown type", "valid": self.LOADERS.keys()}, 400
+        results, status = loader().consume_request(request)
+        return results, status
