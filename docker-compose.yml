@@ -1,0 +1,17 @@
+# docker compose config
+# http://docs.docker.com/compose/
+#
+osoba:
+  build: .
+  expose:
+    - "5000"
+  links:
+    - postgres
+postgres:
+  image: postgres
+  volumes:
+    - 'db/:/var/lib/postgresql/data'
+  environment:
+    POSTGRES_USER:     osoba
+    POSTGRES_PASSWORD: osoba
+    POSTGRES_DATABASE: osoba
