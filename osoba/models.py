@@ -17,6 +17,8 @@ def create_entity(_type, properties={}, commit=True):
     e = Entity()
     e.type = _type
     db.session.add(e)
+    for key, value in properties.iteritems():
+        e.set_prop(key, value, commit=False)
     if commit:
         db.session.commit()
     return e
@@ -27,6 +29,8 @@ def create_relationship(_type, _from, to, properties={}, commit=True):
     e._from = _from
     e.to = to
     db.session.add(e)
+    for key, value in properties.iteritems():
+        e.set_prop(key, value, commit=False)
     if commit:
         db.session.commit()
     return e
@@ -44,20 +48,32 @@ class Entity(db.Model):
     type    = db.Column(db.String, index=True)
     properties = db.relationship('EntityProperty', backref='entity',
                                  lazy='dynamic', cascade="all, delete-orphan")
-
+    relationships_to = db.relationship('Relationship',
+                                 foreign_keys="Relationship.to",
+                                 lazy='dynamic', cascade="all, delete-orphan")
+    relationships_from = db.relationship('Relationship',
+                                 foreign_keys="Relationship._from",
+                                 lazy='dynamic', cascade="all, delete-orphan")
     def to_json(self):
-        return {"id": self.id, "type": self.type, "properties": dict([
-            (x.key, x.value) for x in self.properties.all()
-            ])}
+        return {
+            "id": self.id,
+            "type": self.type,
+            "properties": dict([
+                    (x.key, x.value) for x in self.properties.all()
+                ]),
+            "links_to": [x.to_json() for x in self.relationships_to.all()],
+            "links_from": [x.to_json() for x in self.relationships_from.all()]
+        }
 
-    def set_prop(self, key, value):
+    def set_prop(self, key, value, commit=True):
         prop = self.properties.filter_by(key=key).first()
         if prop:
             prop.value = value
         else:
             prop = EntityProperty(eid=self.id, key=key, value=value)
             db.session.add(prop)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return prop
 
     def get_prop(self, key):
@@ -74,14 +90,15 @@ class Relationship(db.Model):
     properties = db.relationship('RelationshipProperty', backref='relationship',
                                  lazy='dynamic')
 
-    def set_prop(self, key, value):
+    def set_prop(self, key, value, commit=True):
         prop = self.properties.filter_by(key=key).first()
         if prop:
             prop.value = value
         else:
             prop = RelationshipProperty(rid=self.id, key=key, value=value)
             db.session.add(prop)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return prop
 
     def get_prop(self, key):
