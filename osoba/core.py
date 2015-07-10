@@ -12,6 +12,7 @@ app.config.from_object(settings)
 db = SQLAlchemy(app)
 
 def createdb():
+    print "Connecting to %s" % settings.SQLALCHEMY_DATABASE_URI
     engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
     if settings.DROP_DB_ON_RESTART and database_exists(engine.url):
         print "Dropping old database... (because DROP_DB_ON_RESTART=True)"
