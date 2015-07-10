@@ -72,7 +72,9 @@ class CSVLoader(OsobaBulkLoader):
             t = node.get("type")
             _from = node.get("from")
             _to = node.get("to")
+
             if _from.startswith("ref:"):
+                oldfrom = _from
                 tok = _from.split(":")
                 field = tok[1]
                 value = tok[2]
@@ -80,8 +82,11 @@ class CSVLoader(OsobaBulkLoader):
                     if items[0][field] == value:
                         _from = items[1]
                         break
+                if _from == oldfrom:
+                    return {"error": "Couldn't find reference '%s'" % value}, 400
 
             if _to.startswith("ref:"):
+                oldto = _to
                 tok = _to.split(":")
                 field = tok[1]
                 value = tok[2]
@@ -89,9 +94,12 @@ class CSVLoader(OsobaBulkLoader):
                     if items[0][field] == value:
                         _to = items[1]
                         break
+                if _to == oldto:
+                    return {"error": "Couldn't find reference '%s'" % value}, 400
 
-            if not t in OSOBA_ENTITY_TYPES:
-                return {"error": "%s isn't a valid type.",
+
+            if not t in OSOBA_RELATIONSHIP_TYPES:
+                return {"error": "%s isn't a valid type." % t,
                         "valid": OSOBA_ENTITY_TYPES}, 400
 
             del node["type"]
