@@ -1,4 +1,5 @@
 FROM python:2.7.9
+MAINTAINER Smári McCarthy <smari@occrp.org>
 
 # you will need need these docker images too:
 # - postgres (expected to be called postgres_osoba
