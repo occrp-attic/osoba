@@ -1,7 +1,8 @@
 # Osoba
 
-Osoba is OCCRP's graph database, intended to keep track of people, companies,
-and all sorts of other things around the world, from numerous data sources.
+Osoba was an experimental graph database, intended to keep track of people, 
+companies, and all sorts of other things around the world, from numerous data 
+sources.
 
 ## Specifications
 
