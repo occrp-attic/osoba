@@ -4,6 +4,8 @@ Osoba was an experimental graph database, intended to keep track of people,
 companies, and all sorts of other things around the world, from numerous data 
 sources.
 
+The project was deprecated in favor of [Spindle](https://github.com/occrp/spindle) and [Loom](https://github.com/occrp/loom).
+
 ## Specifications
 
 See `doc/specs.md`
